@@ -25,7 +25,7 @@ func main() {
         log.Println("tags:", tags)
     }
 
-    videos, err := c.Videos().PerPage(5).AddTags("Futebol").Fetch()
+    videos, err := c.Videos().PerPage(5).WithTags("Futebol").Fetch()
     if err != nil {
         log.Println("error while fetching videos:", err)
     } else {
@@ -34,7 +34,7 @@ func main() {
 }
 ```
 
-### Using a custom fetcher
+### Using a custom `RoundTripper`
 
 ```go
 package main
@@ -47,15 +47,15 @@ import (
     "github.com/tpisani/webmedia-go"
 )
 
-type URLLogFetcher struct{}
+type RoundTripLogger struct{}
 
-func (f URLLogFetcher) FetchURL(u url.URL) (*http.Response, error) {
-    log.Println("Fetching videos:", u.String())
-    return http.Get(u.String())
+func (rt RoundTripLogger) RoundTrip(r *http.Request) (*http.Response, error) {
+    log.Println("fetching videos from:", r.URL.String())
+    return http.DefaultClient.Do(r)
 }
 
 func main() {
-    c := webmedia.NewClient("access-token", webmedia.WithURLFetcher(URLLogFetcher{}))
+    c := webmedia.NewClient("access-token", webmedia.WithRoundTripper(RoundTripLogger{}))
 
     videos, err := c.Videos().PerPage(10).Fetch()
     if err != nil {

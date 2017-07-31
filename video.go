@@ -75,7 +75,7 @@ func (v VideosQuery) Page(n int) VideosQuery {
 	return clone
 }
 
-func (v VideosQuery) AddTags(tags ...string) VideosQuery {
+func (v VideosQuery) WithTags(tags ...string) VideosQuery {
 	clone := v.clone()
 	clone.tags = append(clone.tags, tags...)
 
@@ -112,11 +112,11 @@ func (v VideosQuery) Fetch() ([]Video, error) {
 type VideoQuery struct {
 	client *Client
 
-	ID int
+	id int
 }
 
 func (v VideoQuery) endpoint() string {
-	return fmt.Sprintf("videos/%d.json", v.ID)
+	return fmt.Sprintf("videos/%d.json", v.id)
 }
 
 func (v VideoQuery) params() *url.Values {

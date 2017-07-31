@@ -5,26 +5,25 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"time"
 
 	"testing"
 )
 
-type MockFetcher struct{}
+type MockRoundTripper struct{}
 
-func (m MockFetcher) FetchURL(u url.URL) (*http.Response, error) {
+func (m MockRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 	var mock io.Reader
 	var err error
 
-	if u.Path == "videos.json" {
+	if r.URL.Path == "/videos.json" {
 		mock, err = os.Open("mocks/videos.json")
-	} else if u.Path == "videos/5767587.json" {
+	} else if r.URL.Path == "/videos/5767587.json" {
 		mock, err = os.Open("mocks/video-5767587.json")
-	} else if u.Path == "tags.json" {
+	} else if r.URL.Path == "/tags.json" {
 		mock, err = os.Open("mocks/tags.json")
-	} else if u.Path == "tags/86.json" {
+	} else if r.URL.Path == "/tags/86.json" {
 		mock, err = os.Open("mocks/tag-86.json")
 	} else {
 		return nil, errors.New("unable to fetch URL, maybe a mock needs some setup")
@@ -34,9 +33,7 @@ func (m MockFetcher) FetchURL(u url.URL) (*http.Response, error) {
 
 	io.Copy(rw, mock)
 
-	resp := rw.Result()
-
-	return resp, err
+	return rw.Result(), err
 }
 
 func TestQueryURLBuilding(t *testing.T) {
@@ -65,19 +62,19 @@ func TestQueryURLBuilding(t *testing.T) {
 		{
 			c.Videos().
 				PerPage(5).
-				AddTags("Flamengo"),
+				WithTags("Flamengo"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=5&tags.all=Flamengo",
 		},
 		{
 			c.Videos().
 				PerPage(20).
-				AddTags("Fluminense", "Vitória"),
+				WithTags("Fluminense", "Vitória"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=20&tags.all=Fluminense%7CVit%C3%B3ria",
 		},
 		{
 			c.Videos().
 				PerPage(25).
-				AddTags("futebol", "Tempo Real", "Flamengo", "Vasco"),
+				WithTags("futebol", "Tempo Real", "Flamengo", "Vasco"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=25&tags.all=futebol%7CTempo+Real%7CFlamengo%7CVasco",
 		},
 		{
@@ -122,7 +119,7 @@ func TestQueryURLBuilding(t *testing.T) {
 }
 
 func TestVideoFetch(t *testing.T) {
-	c := NewClient("fake-token", WithURLFetcher(MockFetcher{}))
+	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 
 	video, err := c.Video(5767587).Fetch()
 	if err != nil {
@@ -164,7 +161,7 @@ func TestVideoFetch(t *testing.T) {
 }
 
 func TestVideosFetch(t *testing.T) {
-	c := NewClient("fake-token", WithURLFetcher(MockFetcher{}))
+	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 
 	videos, err := c.Videos().Fetch()
 	if err != nil {
@@ -178,7 +175,7 @@ func TestVideosFetch(t *testing.T) {
 }
 
 func TestTagFetch(t *testing.T) {
-	c := NewClient("fake-token", WithURLFetcher(MockFetcher{}))
+	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 
 	tag, err := c.Tag(86).Fetch()
 	if err != nil {
@@ -197,7 +194,7 @@ func TestTagFetch(t *testing.T) {
 }
 
 func TestTagsFetch(t *testing.T) {
-	c := NewClient("fake-token", WithURLFetcher(MockFetcher{}))
+	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 
 	tags, err := c.Tags().Fetch()
 	if err != nil {

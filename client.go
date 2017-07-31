@@ -11,14 +11,14 @@ type query interface {
 }
 
 type Client struct {
-	fetcher     URLFetcher
-	url         url.URL
-	accessToken string
+	roundTripper http.RoundTripper
+	url          url.URL
+	accessToken  string
 }
 
 func NewClient(accessToken string, options ...ClientOption) *Client {
 	c := &Client{
-		fetcher: HTTPFetcher{},
+		roundTripper: http.DefaultTransport,
 		url: url.URL{
 			Scheme: "http",
 			Host:   "api.video.globoi.com",
@@ -53,13 +53,17 @@ func (c *Client) buildURL(endpoint string, params *url.Values) url.URL {
 
 func (c *Client) fetch(q query) (*http.Response, error) {
 	u := c.buildURL(q.endpoint(), q.params())
-	return c.fetcher.FetchURL(u)
+	r, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.roundTripper.RoundTrip(r)
 }
 
 func (c *Client) Video(id int) VideoQuery {
 	return VideoQuery{
 		client: c,
-		ID:     id,
+		id:     id,
 	}
 }
 
