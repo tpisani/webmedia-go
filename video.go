@@ -17,6 +17,8 @@ type VideosQuery struct {
 
 	tags []string
 
+	fields []string
+
 	publishedSince time.Time
 	publishedUntil time.Time
 }
@@ -40,6 +42,10 @@ func (v VideosQuery) params() *url.Values {
 		params.Set("tags.all", strings.Join(v.tags, "|"))
 	}
 
+	if len(v.fields) != 0 {
+		params.Set("only", strings.Join(v.fields, "|"))
+	}
+
 	if !v.publishedSince.IsZero() {
 		params.Set("published_at.gte", v.publishedSince.Format(dateLayout))
 	}
@@ -56,6 +62,7 @@ func (v VideosQuery) clone() VideosQuery {
 		client:         v.client,
 		perPage:        v.perPage,
 		tags:           v.tags,
+		fields:         v.fields,
 		publishedSince: v.publishedSince,
 		publishedUntil: v.publishedUntil,
 	}
@@ -75,7 +82,7 @@ func (v VideosQuery) Page(n int) VideosQuery {
 	return clone
 }
 
-func (v VideosQuery) WithTags(tags ...string) VideosQuery {
+func (v VideosQuery) AddTags(tags ...string) VideosQuery {
 	clone := v.clone()
 	clone.tags = append(clone.tags, tags...)
 
@@ -92,6 +99,13 @@ func (v VideosQuery) PublishedSince(t time.Time) VideosQuery {
 func (v VideosQuery) PublishedUntil(t time.Time) VideosQuery {
 	clone := v.clone()
 	clone.publishedUntil = t
+
+	return clone
+}
+
+func (v VideosQuery) Fields(fields ...string) VideosQuery {
+	clone := v.clone()
+	clone.fields = append(clone.fields, fields...)
 
 	return clone
 }
@@ -113,6 +127,8 @@ type VideoQuery struct {
 	client *Client
 
 	id int
+
+	fields []string
 }
 
 func (v VideoQuery) endpoint() string {
@@ -120,7 +136,27 @@ func (v VideoQuery) endpoint() string {
 }
 
 func (v VideoQuery) params() *url.Values {
-	return nil
+	params := &url.Values{}
+
+	if len(v.fields) != 0 {
+		params.Set("only", strings.Join(v.fields, "|"))
+	}
+
+	return params
+}
+
+func (v VideoQuery) clone() VideoQuery {
+	return VideoQuery{
+		client: v.client,
+		id:     v.id,
+	}
+}
+
+func (v VideoQuery) Fields(fields ...string) VideoQuery {
+	clone := v.clone()
+	clone.fields = append(clone.fields, fields...)
+
+	return clone
 }
 
 func (v VideoQuery) Fetch() (*Video, error) {
@@ -135,13 +171,19 @@ func (v VideoQuery) Fetch() (*Video, error) {
 	return &video, err
 }
 
+type VideoMetadata struct {
+	ContentRating string `json:"content_rating"`
+}
+
 type Video struct {
-	ID          int       `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Duration    int       `json:"duration"`
-	PublishedAt time.Time `json:"published_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	ExhibitedAt time.Time `json:"exhibited_at"`
-	Tags        []string  `json:"tags"`
+	ID               int            `json:"id"`
+	Title            string         `json:"title"`
+	Description      string         `json:"description"`
+	Duration         int            `json:"duration"`
+	PublishedAt      time.Time      `json:"published_at"`
+	UpdatedAt        time.Time      `json:"updated_at"`
+	ExhibitedAt      time.Time      `json:"exhibited_at"`
+	SubscriberOnly   bool           `json:"subscriber_only"`
+	Tags             []string       `json:"tags"`
+	ExtendedMetadata *VideoMetadata `json:"extended_metadata"`
 }

@@ -21,6 +21,8 @@ func (m MockRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 		mock, err = os.Open("mocks/videos.json")
 	} else if r.URL.Path == "/videos/5767587.json" {
 		mock, err = os.Open("mocks/video-5767587.json")
+	} else if r.URL.Path == "/videos/6053793.json" {
+		mock, err = os.Open("mocks/video-6053793.json")
 	} else if r.URL.Path == "/tags.json" {
 		mock, err = os.Open("mocks/tags.json")
 	} else if r.URL.Path == "/tags/86.json" {
@@ -33,7 +35,9 @@ func (m MockRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 
 	io.Copy(rw, mock)
 
-	return rw.Result(), err
+	resp := rw.Result()
+
+	return resp, err
 }
 
 func TestQueryURLBuilding(t *testing.T) {
@@ -48,6 +52,10 @@ func TestQueryURLBuilding(t *testing.T) {
 			"http://api.video.globoi.com/videos/857.json?access_token=fake-token",
 		},
 		{
+			c.Video(857).Fields("subscriber_only"),
+			"http://api.video.globoi.com/videos/857.json?access_token=fake-token&only=subscriber_only",
+		},
+		{
 			c.Videos(),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token",
 		},
@@ -60,21 +68,25 @@ func TestQueryURLBuilding(t *testing.T) {
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&page=3&per_page=15",
 		},
 		{
+			c.Videos().Fields("subscriber_only", "extended_metadata").PerPage(15).Page(3),
+			"http://api.video.globoi.com/videos.json?access_token=fake-token&only=subscriber_only%7Cextended_metadata&page=3&per_page=15",
+		},
+		{
 			c.Videos().
 				PerPage(5).
-				WithTags("Flamengo"),
+				AddTags("Flamengo"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=5&tags.all=Flamengo",
 		},
 		{
 			c.Videos().
 				PerPage(20).
-				WithTags("Fluminense", "Vitória"),
+				AddTags("Fluminense", "Vitória"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=20&tags.all=Fluminense%7CVit%C3%B3ria",
 		},
 		{
 			c.Videos().
 				PerPage(25).
-				WithTags("futebol", "Tempo Real", "Flamengo", "Vasco"),
+				AddTags("futebol", "Tempo Real", "Flamengo", "Vasco"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=25&tags.all=futebol%7CTempo+Real%7CFlamengo%7CVasco",
 		},
 		{
@@ -113,14 +125,13 @@ func TestQueryURLBuilding(t *testing.T) {
 	for _, test := range tests {
 		u := c.buildURL(test.query.endpoint(), test.query.params())
 		if test.expected != u.String() {
-			t.Errorf("query URL mismatch: expected \"%s\" got \"%s\"", test.expected, u.String())
+			t.Errorf("query URL mismatch: expected \"%s\" got \"%s\"", test.expected, u)
 		}
 	}
 }
 
 func TestVideoFetch(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
-
 	video, err := c.Video(5767587).Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch video:", err)
@@ -158,11 +169,64 @@ func TestVideoFetch(t *testing.T) {
 	if !updatedAt.Equal(video.UpdatedAt) {
 		t.Errorf("video updated_at mismatch: expected \"%s\" got \"%s\"", updatedAt, video.UpdatedAt)
 	}
+
+	if video.ExtendedMetadata != nil {
+		t.Error("video should not have any extended metadata")
+	}
+}
+func TestVideoWithExtendedMetadataFetch(t *testing.T) {
+	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	video, err := c.Video(6053793).Fetch()
+	if err != nil {
+		t.Fatal("unable to fetch video:", err)
+	}
+
+	id := 6053793
+	if id != video.ID {
+		t.Error("video ID mismatch: expected", id, "got", video.ID)
+		t.Errorf("video ID mismatch: expected \"%d\" got \"%d\"", id, video.ID)
+	}
+
+	title := "Violência tem Cor, Novos Expedientes, Todas as Vulvas"
+	if title != video.Title {
+		t.Errorf("video title mismatch: expected \"%s\" got \"%s\"", title, video.Title)
+	}
+
+	duration := 2859993
+	if duration != video.Duration {
+		t.Errorf("video duration mismatch: expected \"%d\" got \"%d\"", duration, video.Duration)
+	}
+
+	tags := []string{"Saia Justa", "GNT"}
+	if tags[0] != video.Tags[0] || tags[1] != video.Tags[1] {
+		t.Errorf("video tags mismatch: expected \"%+v\" got \"%+v\"", tags, video.Tags)
+	}
+
+	loc, _ := time.LoadLocation("America/Sao_Paulo")
+
+	publishedAt := time.Date(2017, 8, 3, 17, 17, 41, 0, loc)
+	if !publishedAt.Equal(video.PublishedAt) {
+		t.Errorf("video published_at mismatch: expected \"%s\" got \"%s\"", publishedAt, video.PublishedAt)
+	}
+
+	updatedAt := time.Date(2017, 8, 3, 17, 17, 41, 0, loc)
+	if !updatedAt.Equal(video.UpdatedAt) {
+		t.Errorf("video updated_at mismatch: expected \"%s\" got \"%s\"", updatedAt, video.UpdatedAt)
+	}
+
+	if video.ExtendedMetadata == nil {
+		t.Fatal("video should have extended metadata")
+	}
+
+	contentRating := "12"
+	if contentRating != video.ExtendedMetadata.ContentRating {
+		t.Errorf("video content rating mismatch: expected \"%s\" got \"%s\"",
+			contentRating, video.ExtendedMetadata.ContentRating)
+	}
 }
 
 func TestVideosFetch(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
-
 	videos, err := c.Videos().Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch videos:", err)
@@ -176,7 +240,6 @@ func TestVideosFetch(t *testing.T) {
 
 func TestTagFetch(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
-
 	tag, err := c.Tag(86).Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch tag:", err)
@@ -195,7 +258,6 @@ func TestTagFetch(t *testing.T) {
 
 func TestTagsFetch(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
-
 	tags, err := c.Tags().Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch tags:", err)
@@ -203,6 +265,6 @@ func TestTagsFetch(t *testing.T) {
 
 	expected := 2
 	if tlen := len(tags); tlen != expected {
-		t.Errorf("tag count mismatch: expected \"%s\" got \"%s\"", expected, tlen)
+		t.Errorf("tag count mismatch: expected \"%d\" got \"%d\"", expected, tlen)
 	}
 }

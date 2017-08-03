@@ -1,0 +1,62 @@
+{
+    "id": 6053793,
+    "legacy_id": 6053793,
+    "_type": "Video",
+    "kind": "FullEpisode",
+    "adult": false,
+    "category": "Entretenimento",
+    "channel_id": 1986,
+    "collaborative_upload_id": null,
+    "collaborative_upload_user": null,
+    "created_at": "2017-08-03T16:40:07-03:00",
+    "created_by": "gsat_nbretas",
+    "cut_format": null,
+    "description": "Violência tem cor? Você já se pegou respondendo mensagem de trabalho fora do expediente? Como lidar com uma jornada que não tem hora pra acabar?",
+    "duration": 2859993,
+    "exhibited_at": "2017-08-02T21:30:00-03:00",
+    "extended_metadata": {
+        "format": [
+            "entrevistas e talk shows"
+        ],
+        "genre_ids": [
+            "5344413892144707e800204a",
+            "534566e59214470801002769"
+        ],
+        "host_ids": [
+            "533171d19214473b7c002cc2",
+            "533171d8dd23813c54001df3",
+            "52716b56dd23816bf900105a",
+            "533171eb9214473b76002d90"
+        ],
+        "content_rating": "12",
+        "content_rating_criteria": [
+            "sem restrição"
+        ],
+        "episode": 22,
+        "season": 16
+    },
+    "hd_available": true,
+    "hits": 0,
+    "hits_data": null,
+    "favorites": 0,
+    "notes": null,
+    "program_id": 4882,
+    "published_at": "2017-08-03T17:17:41-03:00",
+    "queryable": true,
+    "recommendation_publisher": "webmedia-globosatplay-intermediate",
+    "scheduled_publication_in": "2017-08-03T00:00:00-03:00",
+    "scheduled_unpublication_in": "2087-01-15T01:00:00-02:00",
+    "status": "published",
+    "subscriber_only": true,
+    "tags": [
+        "Saia Justa",
+        "GNT"
+    ],
+    "title": "Violência tem Cor, Novos Expedientes, Todas as Vulvas",
+    "unpublished_at": null,
+    "updated_at": "2017-08-03T17:17:41-03:00",
+    "updated_by": "gsat_nbretas",
+    "url_for_consumption": "https://globosatplay.globo.com/gnt/v/6053793/",
+    "videos_ids": [],
+    "countries": []
+}
