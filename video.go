@@ -82,7 +82,7 @@ func (v VideosQuery) Page(n int) VideosQuery {
 	return clone
 }
 
-func (v VideosQuery) AddTags(tags ...string) VideosQuery {
+func (v VideosQuery) WithTags(tags ...string) VideosQuery {
 	clone := v.clone()
 	clone.tags = append(clone.tags, tags...)
 

@@ -74,19 +74,19 @@ func TestQueryURLBuilding(t *testing.T) {
 		{
 			c.Videos().
 				PerPage(5).
-				AddTags("Flamengo"),
+				WithTags("Flamengo"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=5&tags.all=Flamengo",
 		},
 		{
 			c.Videos().
 				PerPage(20).
-				AddTags("Fluminense", "Vitória"),
+				WithTags("Fluminense", "Vitória"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=20&tags.all=Fluminense%7CVit%C3%B3ria",
 		},
 		{
 			c.Videos().
 				PerPage(25).
-				AddTags("futebol", "Tempo Real", "Flamengo", "Vasco"),
+				WithTags("futebol", "Tempo Real", "Flamengo", "Vasco"),
 			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=25&tags.all=futebol%7CTempo+Real%7CFlamengo%7CVasco",
 		},
 		{
