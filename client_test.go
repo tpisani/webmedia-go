@@ -17,7 +17,7 @@ func (m MockRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 	var mock io.Reader
 	var err error
 
-	if r.URL.Path == "/videos.json" {
+	if r.URL.Path == "/videos/with_pagination.json" {
 		mock, err = os.Open("mocks/videos.json")
 	} else if r.URL.Path == "/videos/5767587.json" {
 		mock, err = os.Open("mocks/video-5767587.json")
@@ -49,76 +49,76 @@ func TestQueryURLBuilding(t *testing.T) {
 	}{
 		{
 			c.Video(857),
-			"http://api.video.globoi.com/videos/857.json?access_token=fake-token",
+			"https://api.video.globoi.com/videos/857.json?access_token=fake-token",
 		},
 		{
 			c.Video(857).Fields("subscriber_only"),
-			"http://api.video.globoi.com/videos/857.json?access_token=fake-token&only=subscriber_only",
+			"https://api.video.globoi.com/videos/857.json?access_token=fake-token&only=subscriber_only",
 		},
 		{
 			c.Videos(),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token",
 		},
 		{
 			c.Videos().PerPage(15),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=15",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=15",
 		},
 		{
 			c.Videos().PerPage(15).Page(3),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&page=3&per_page=15",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&page=3&per_page=15",
 		},
 		{
 			c.Videos().Fields("subscriber_only", "extended_metadata").PerPage(15).Page(3),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&only=subscriber_only%7Cextended_metadata&page=3&per_page=15",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&only=subscriber_only%7Cextended_metadata&page=3&per_page=15",
 		},
 		{
 			c.Videos().
 				PerPage(5).
 				WithTags("Flamengo"),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=5&tags.all=Flamengo",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=5&tags.all=Flamengo",
 		},
 		{
 			c.Videos().
 				PerPage(20).
 				WithTags("Fluminense", "Vitória"),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=20&tags.all=Fluminense%7CVit%C3%B3ria",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=20&tags.all=Fluminense%7CVit%C3%B3ria",
 		},
 		{
 			c.Videos().
 				PerPage(25).
 				WithTags("futebol", "Tempo Real", "Flamengo", "Vasco"),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=25&tags.all=futebol%7CTempo+Real%7CFlamengo%7CVasco",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=25&tags.all=futebol%7CTempo+Real%7CFlamengo%7CVasco",
 		},
 		{
 			c.Videos().
 				PerPage(5).
 				PublishedSince(time.Date(2017, 3, 30, 0, 0, 0, 0, time.UTC)),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=5&published_at.gte=2017-03-30T00%3A00%3A00",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=5&published_at.gte=2017-03-30T00%3A00%3A00",
 		},
 		{
 			c.Videos().
 				PerPage(5).
 				PublishedUntil(time.Date(2017, 3, 30, 0, 0, 0, 0, time.UTC)),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=5&published_at.lte=2017-03-30T00%3A00%3A00",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=5&published_at.lte=2017-03-30T00%3A00%3A00",
 		},
 		{
 			c.Videos().
 				PerPage(5).
 				PublishedSince(time.Date(2017, 3, 25, 0, 0, 0, 0, time.UTC)).
 				PublishedUntil(time.Date(2017, 3, 30, 0, 0, 0, 0, time.UTC)),
-			"http://api.video.globoi.com/videos.json?access_token=fake-token&per_page=5&published_at.gte=2017-03-25T00%3A00%3A00&published_at.lte=2017-03-30T00%3A00%3A00",
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=5&published_at.gte=2017-03-25T00%3A00%3A00&published_at.lte=2017-03-30T00%3A00%3A00",
 		},
 		{
 			c.Tag(456),
-			"http://api.video.globoi.com/tags/456.json?access_token=fake-token",
+			"https://api.video.globoi.com/tags/456.json?access_token=fake-token",
 		},
 		{
 			c.Tags(),
-			"http://api.video.globoi.com/tags.json?access_token=fake-token",
+			"https://api.video.globoi.com/tags.json?access_token=fake-token",
 		},
 		{
 			c.Tags().Name("Futebol"),
-			"http://api.video.globoi.com/tags.json?access_token=fake-token&name=Futebol",
+			"https://api.video.globoi.com/tags.json?access_token=fake-token&name=Futebol",
 		},
 	}
 
@@ -130,7 +130,7 @@ func TestQueryURLBuilding(t *testing.T) {
 	}
 }
 
-func TestVideoFetch(t *testing.T) {
+func TestVideo(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 	video, err := c.Video(5767587).Fetch()
 	if err != nil {
@@ -174,7 +174,7 @@ func TestVideoFetch(t *testing.T) {
 		t.Error("video should not have any extended metadata")
 	}
 }
-func TestVideoWithExtendedMetadataFetch(t *testing.T) {
+func TestVideoWithExtendedMetadata(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 	video, err := c.Video(6053793).Fetch()
 	if err != nil {
@@ -225,20 +225,68 @@ func TestVideoWithExtendedMetadataFetch(t *testing.T) {
 	}
 }
 
-func TestVideosFetch(t *testing.T) {
+func TestVideoResultsVideos(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
-	videos, err := c.Videos().Fetch()
+	result, err := c.Videos().Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch videos:", err)
 	}
 
 	expected := 5
-	if vlen := len(videos); vlen != expected {
+	if vlen := len(result.Videos); vlen != expected {
 		t.Error("video count mismatch: expected", expected, "got", vlen)
 	}
 }
 
-func TestTagFetch(t *testing.T) {
+func TestVideoResultsPager(t *testing.T) {
+	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	result, err := c.Videos().Fetch()
+	if err != nil {
+		t.Fatal("unable to fetch videos:", err)
+	}
+
+	totalEntries := 3264095
+	if totalEntries != result.Pager.TotalEntries {
+		t.Errorf("video results pager total entries mismatch: expected \"%d\" got \"%d\"",
+			totalEntries, result.Pager.TotalEntries)
+	}
+
+	totalPages := 272008
+	if totalPages != result.Pager.TotalPages {
+		t.Errorf("video results pager total pages mismatch: expected \"%d\" got \"%d\"",
+			totalPages, result.Pager.TotalPages)
+	}
+
+	perPage := 12
+	if perPage != result.Pager.PerPage {
+		t.Errorf("video results pager per page mismatch: expected \"%d\" got \"%d\"",
+			perPage, result.Pager.PerPage)
+	}
+
+	offset := 0
+	if offset != result.Pager.Offset {
+		t.Errorf("video results pager offset mismatch: expected \"%d\" got \"%d\"",
+			offset, result.Pager.Offset)
+	}
+
+	if result.Pager.PreviousPage != nil {
+		t.Error("video results pager previous page should be nil")
+	}
+
+	currentPage := 1
+	if currentPage != result.Pager.CurrentPage {
+		t.Errorf("video results pager current page mismatch: expected \"%d\" got \"%d\"",
+			currentPage, result.Pager.CurrentPage)
+	}
+
+	nextPage := 2
+	if nextPage != *result.Pager.NextPage {
+		t.Errorf("video results pager next page mismatch: expected \"%d\" got \"%d\"",
+			nextPage, result.Pager.NextPage)
+	}
+}
+
+func TestTag(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 	tag, err := c.Tag(86).Fetch()
 	if err != nil {
@@ -256,7 +304,7 @@ func TestTagFetch(t *testing.T) {
 	}
 }
 
-func TestTagsFetch(t *testing.T) {
+func TestTags(t *testing.T) {
 	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
 	tags, err := c.Tags().Fetch()
 	if err != nil {

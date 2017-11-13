@@ -25,11 +25,11 @@ func main() {
         log.Println("tags:", tags)
     }
 
-    videos, err := c.Videos().PerPage(5).WithTags("Futebol").Fetch()
+    result, err := c.Videos().PerPage(5).WithTags("Futebol").Fetch()
     if err != nil {
         log.Println("error while fetching videos:", err)
     } else {
-        log.Println("videos:", videos)
+        log.Println("videos:", result.Videos)
     }
 }
 ```
@@ -57,11 +57,11 @@ func (rt RoundTripLogger) RoundTrip(r *http.Request) (*http.Response, error) {
 func main() {
     c := webmedia.NewClient("access-token", webmedia.WithRoundTripper(RoundTripLogger{}))
 
-    videos, err := c.Videos().PerPage(10).Fetch()
+    result, err := c.Videos().PerPage(10).Fetch()
     if err != nil {
         log.Println("error while fetching videos:", err)
     } else {
-        log.Println("videos:", videos)
+        log.Println("videos:", result.Videos)
     }
 }
 ```

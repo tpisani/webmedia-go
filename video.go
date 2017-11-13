@@ -24,7 +24,7 @@ type VideosQuery struct {
 }
 
 func (v VideosQuery) endpoint() string {
-	return "videos.json"
+	return "videos/with_pagination.json"
 }
 
 func (v VideosQuery) params() *url.Values {
@@ -110,17 +110,17 @@ func (v VideosQuery) Fields(fields ...string) VideosQuery {
 	return clone
 }
 
-func (v VideosQuery) Fetch() ([]Video, error) {
-	var videos []Video
+func (v VideosQuery) Fetch() (VideoResults, error) {
+	var results VideoResults
 
 	resp, err := v.client.fetch(v)
 	if err != nil {
-		return videos, err
+		return results, err
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(&videos)
-	return videos, err
+	err = json.NewDecoder(resp.Body).Decode(&results)
+	return results, err
 }
 
 type VideoQuery struct {
@@ -171,6 +171,16 @@ func (v VideoQuery) Fetch() (*Video, error) {
 	return &video, err
 }
 
+type Pager struct {
+	TotalEntries int  `json:"total_entries"`
+	TotalPages   int  `json:"total_pages"`
+	PerPage      int  `json:"per_page"`
+	Offset       int  `json:"offset"`
+	PreviousPage *int `json:"previous_page"`
+	CurrentPage  int  `json:"current_page"`
+	NextPage     *int `json:"next_page"`
+}
+
 type VideoMetadata struct {
 	ContentRating string `json:"content_rating"`
 }
@@ -186,4 +196,9 @@ type Video struct {
 	SubscriberOnly   bool           `json:"subscriber_only"`
 	Tags             []string       `json:"tags"`
 	ExtendedMetadata *VideoMetadata `json:"extended_metadata"`
+}
+
+type VideoResults struct {
+	Pager  Pager   `json:"pager"`
+	Videos []Video `json:"videos"`
 }

@@ -20,7 +20,7 @@ func NewClient(accessToken string, options ...ClientOption) *Client {
 	c := &Client{
 		roundTripper: http.DefaultTransport,
 		url: url.URL{
-			Scheme: "http",
+			Scheme: "https",
 			Host:   "api.video.globoi.com",
 		},
 		accessToken: accessToken,
