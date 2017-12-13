@@ -15,6 +15,8 @@ type VideosQuery struct {
 	page    int
 	perPage int
 
+	orderBy string
+
 	tags []string
 
 	fields []string
@@ -54,6 +56,10 @@ func (v VideosQuery) params() *url.Values {
 		params.Set("published_at.lte", v.publishedUntil.Format(dateLayout))
 	}
 
+	if v.orderBy != "" {
+		params.Set("order_by", v.orderBy)
+	}
+
 	return params
 }
 
@@ -78,6 +84,13 @@ func (v VideosQuery) PerPage(n int) VideosQuery {
 func (v VideosQuery) Page(n int) VideosQuery {
 	clone := v.clone()
 	clone.page = n
+
+	return clone
+}
+
+func (v VideosQuery) OrderBy(order string) VideosQuery {
+	clone := v.clone()
+	clone.orderBy = order
 
 	return clone
 }

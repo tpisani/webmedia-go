@@ -60,6 +60,14 @@ func TestQueryURLBuilding(t *testing.T) {
 			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token",
 		},
 		{
+			c.Videos().OrderBy("published_at"),
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&order_by=published_at",
+		},
+		{
+			c.Videos().OrderBy("published_at.desc"),
+			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&order_by=published_at.desc",
+		},
+		{
 			c.Videos().PerPage(15),
 			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=15",
 		},
