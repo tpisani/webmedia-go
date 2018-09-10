@@ -133,7 +133,7 @@ func TestQueryURLBuilding(t *testing.T) {
 	for _, test := range tests {
 		u := c.buildURL(test.query.endpoint(), test.query.params())
 		if test.expected != u.String() {
-			t.Errorf("query URL mismatch: expected \"%s\" got \"%s\"", test.expected, u)
+			t.Errorf("query URL mismatch: expected \"%s\" got \"%s\"", test.expected, u.String())
 		}
 	}
 }
