@@ -17,7 +17,9 @@ func (m MockRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 	var mock io.Reader
 	var err error
 
-	if r.URL.Path == "/videos/with_pagination.json" {
+	if r.URL.Path == "/videos/pagination.json" {
+		mock, err = os.Open("mocks/videos_pagination.json")
+	} else if r.URL.Path == "/videos/with_pagination.json" {
 		mock, err = os.Open("mocks/videos.json")
 	} else if r.URL.Path == "/videos/5767587.json" {
 		mock, err = os.Open("mocks/video-5767587.json")
@@ -115,6 +117,10 @@ func TestQueryURLBuilding(t *testing.T) {
 				PublishedSince(time.Date(2017, 3, 25, 0, 0, 0, 0, time.UTC)).
 				PublishedUntil(time.Date(2017, 3, 30, 0, 0, 0, 0, time.UTC)),
 			"https://api.video.globoi.com/videos/with_pagination.json?access_token=fake-token&per_page=5&published_at.gte=2017-03-25T00%3A00%3A00&published_at.lte=2017-03-30T00%3A00%3A00",
+		},
+		{
+			c.Videos().WithTags("Futebol").Pager(),
+			"https://api.video.globoi.com/videos/pagination.json?access_token=fake-token&tags.all=Futebol",
 		},
 		{
 			c.Tag(456),
@@ -230,6 +236,42 @@ func TestVideoWithExtendedMetadata(t *testing.T) {
 	if contentRating != video.ExtendedMetadata.ContentRating {
 		t.Errorf("video content rating mismatch: expected \"%s\" got \"%s\"",
 			contentRating, video.ExtendedMetadata.ContentRating)
+	}
+}
+
+func TestVideosPager(t *testing.T) {
+	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	pager, err := c.Videos().WithTags("Futebol").Pager().Fetch()
+	if err != nil {
+		t.Fatal("unable to fetch videos pagination:", err)
+	}
+
+	if 3779179 != pager.TotalEntries {
+		t.Errorf("total entries mismatch: expected %d, got %d", 3779179, pager.TotalEntries)
+	}
+
+	if 314932 != pager.TotalPages {
+		t.Errorf("total pages mismatch: expected %d, got %d", 314932, pager.TotalPages)
+	}
+
+	if 12 != pager.PerPage {
+		t.Errorf("total pages mismatch: expected %d, got %d", 12, pager.PerPage)
+	}
+
+	if 0 != pager.Offset {
+		t.Errorf("total pages mismatch: expected %d, got %d", 0, pager.Offset)
+	}
+
+	if nil != pager.PreviousPage {
+		t.Errorf("total pages mismatch: expected %v, got %d", nil, pager.PreviousPage)
+	}
+
+	if 1 != pager.CurrentPage {
+		t.Errorf("total pages mismatch: expected %d, got %d", 1, pager.CurrentPage)
+	}
+
+	if 2 != *pager.NextPage {
+		t.Errorf("total pages mismatch: expected %v, got %v", 2, pager.NextPage)
 	}
 }
 

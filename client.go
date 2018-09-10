@@ -53,7 +53,7 @@ func (c *Client) buildURL(endpoint string, params *url.Values) url.URL {
 
 func (c *Client) fetch(q query) (*http.Response, error) {
 	u := c.buildURL(q.endpoint(), q.params())
-	r, err := http.NewRequest("GET", u.String(), nil)
+	r, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}

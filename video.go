@@ -123,6 +123,10 @@ func (v VideosQuery) Fields(fields ...string) VideosQuery {
 	return clone
 }
 
+func (v VideosQuery) Pager() VideosPagerQuery {
+	return VideosPagerQuery{v}
+}
+
 func (v VideosQuery) Fetch() (VideoResults, error) {
 	var results VideoResults
 
@@ -182,16 +186,6 @@ func (v VideoQuery) Fetch() (*Video, error) {
 	var video Video
 	err = json.NewDecoder(resp.Body).Decode(&video)
 	return &video, err
-}
-
-type Pager struct {
-	TotalEntries int  `json:"total_entries"`
-	TotalPages   int  `json:"total_pages"`
-	PerPage      int  `json:"per_page"`
-	Offset       int  `json:"offset"`
-	PreviousPage *int `json:"previous_page"`
-	CurrentPage  int  `json:"current_page"`
-	NextPage     *int `json:"next_page"`
 }
 
 type VideoMetadata struct {
