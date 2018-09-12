@@ -11,9 +11,9 @@ import (
 	"testing"
 )
 
-type MockRoundTripper struct{}
+type MockTransport struct{}
 
-func (m MockRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
+func (m MockTransport) Do(r *http.Request) (*http.Response, error) {
 	var mock io.Reader
 	var err error
 
@@ -145,7 +145,7 @@ func TestQueryURLBuilding(t *testing.T) {
 }
 
 func TestVideo(t *testing.T) {
-	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	c := NewClient("fake-token", WithTransport(MockTransport{}))
 	video, err := c.Video(5767587).Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch video:", err)
@@ -189,7 +189,7 @@ func TestVideo(t *testing.T) {
 	}
 }
 func TestVideoWithExtendedMetadata(t *testing.T) {
-	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	c := NewClient("fake-token", WithTransport(MockTransport{}))
 	video, err := c.Video(6053793).Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch video:", err)
@@ -240,7 +240,7 @@ func TestVideoWithExtendedMetadata(t *testing.T) {
 }
 
 func TestVideosPager(t *testing.T) {
-	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	c := NewClient("fake-token", WithTransport(MockTransport{}))
 	pager, err := c.Videos().WithTags("Futebol").Pager().Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch videos pagination:", err)
@@ -276,7 +276,7 @@ func TestVideosPager(t *testing.T) {
 }
 
 func TestVideoResultsVideos(t *testing.T) {
-	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	c := NewClient("fake-token", WithTransport(MockTransport{}))
 	result, err := c.Videos().Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch videos:", err)
@@ -289,7 +289,7 @@ func TestVideoResultsVideos(t *testing.T) {
 }
 
 func TestVideoResultsPager(t *testing.T) {
-	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	c := NewClient("fake-token", WithTransport(MockTransport{}))
 	result, err := c.Videos().Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch videos:", err)
@@ -337,7 +337,7 @@ func TestVideoResultsPager(t *testing.T) {
 }
 
 func TestTag(t *testing.T) {
-	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	c := NewClient("fake-token", WithTransport(MockTransport{}))
 	tag, err := c.Tag(86).Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch tag:", err)
@@ -355,7 +355,7 @@ func TestTag(t *testing.T) {
 }
 
 func TestTags(t *testing.T) {
-	c := NewClient("fake-token", WithRoundTripper(MockRoundTripper{}))
+	c := NewClient("fake-token", WithTransport(MockTransport{}))
 	tags, err := c.Tags().Fetch()
 	if err != nil {
 		t.Fatal("unable to fetch tags:", err)

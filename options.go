@@ -1,7 +1,6 @@
 package webmedia
 
 import (
-	"net/http"
 	"net/url"
 )
 
@@ -13,8 +12,8 @@ func WithBaseURL(u url.URL) ClientOption {
 	}
 }
 
-func WithRoundTripper(roundTripper http.RoundTripper) ClientOption {
+func WithTransport(transport Transport) ClientOption {
 	return func(c *Client) {
-		c.roundTripper = roundTripper
+		c.transport = transport
 	}
 }

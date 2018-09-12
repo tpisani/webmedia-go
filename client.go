@@ -10,20 +10,24 @@ type query interface {
 	params() *url.Values
 }
 
+type Transport interface {
+	Do(r *http.Request) (*http.Response, error)
+}
+
 type Client struct {
-	roundTripper http.RoundTripper
-	url          url.URL
-	accessToken  string
+	url         url.URL
+	accessToken string
+	transport   Transport
 }
 
 func NewClient(accessToken string, options ...ClientOption) *Client {
 	c := &Client{
-		roundTripper: http.DefaultTransport,
 		url: url.URL{
 			Scheme: "https",
 			Host:   "api.video.globoi.com",
 		},
 		accessToken: accessToken,
+		transport:   http.DefaultClient,
 	}
 
 	for _, opt := range options {
@@ -57,7 +61,7 @@ func (c *Client) fetch(q query) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return c.roundTripper.RoundTrip(r)
+	return c.transport.Do(r)
 }
 
 func (c *Client) Video(id int) VideoQuery {
